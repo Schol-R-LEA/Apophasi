@@ -1,14 +1,21 @@
 #!r6rs
 (library
  (apophasi apophasi)
- (export apophasi:eval)
+ (export
+  apophasi:eval
+  &apophasi-syntax-error
+  make-apophasi-syntax-error apophasi-syntax-error? apophasi-syntax-error-irritant)
  (import
   (rnrs (6))
   (rnrs base (6))
-  (rnrs eval (6)))
+  (rnrs eval (6))
+  (rnrs exceptions (6))
+  (rnrs conditions (6)))
  
  (define (self-evaluating? expr)
-   (number? expr))
+   (or (number? expr)
+       (string? expr)
+       (char? expr)))
  
  (define (id expr env)
    expr)
@@ -80,5 +87,13 @@
                  eval-dispatch-table)))
      (if (list? match)
          ((cadr match) expr env)
-         (error "Could not evaluate expression" expr)))))
+         (raise-continuable
+          (condition
+           (make-apophasi-syntax-error expr)
+           (make-message-condition
+            "Could not evaluate expression"))))))
+ 
+ (define-condition-type &apophasi-syntax-error &condition
+   make-apophasi-syntax-error apophasi-syntax-error?
+   (irritant-expression apophasi-syntax-error-irritant)))
 
