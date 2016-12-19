@@ -1,0 +1,13 @@
+%%%% Starting test Test atomic expressions
+Group begin: Test atomic expressions
+Group begin: Basic matcher generation - a single atomic rule
+Test begin:
+  source-file: "/home/schol-r-lea/Documents/Programming/Projects/Apophasi/test/test-eval.scm"
+  source-line: 18
+  source-form: (test-equal 1 (apophasi:eval 1 (quote ())))
+Test end:
+  expected-value: 1
+  actual-value: 1
+  result-kind: pass
+Group end: Basic matcher generation - a single atomic rule
+Group end: Test atomic expressions

@@ -15,4 +15,4 @@
    "Test atomic expressions"
    (test-group
     "Basic matcher generation - a single atomic rule"
-    (assert-equal? 1 (apophasi:eval 1 '())))))
+    (test-equal 1 (apophasi:eval 1 '())))))
