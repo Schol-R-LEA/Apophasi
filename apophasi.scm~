@@ -1,0 +1,30 @@
+#!r6rs
+
+(import
+  (rnrs (6))
+  (rnrs base (6))
+  (rnrs enums (6))
+  (rnrs hashtables (6))
+  (rnrs lists (6))
+  (rnrs exceptions (6))
+  (rnrs conditions (6))
+  (rnrs records syntactic (6))
+  (srfi :14))
+
+(define-syntax apophasi:make-domain
+  (syntax-rules (:fields :ctor :methods)
+    ((_ <name>
+	:fields (<field-name-n> <field-domain-n>) ...
+	:ctor <ctor-body> (<ctor-param-n> ...)
+	:methods ((<method-name-n> <method-param-n-prime> ... <method-body-n>) ...))
+     `(define apophasi:make-,@<name>
+	; define the domain's interface
+	(lambda (method . params)
+	  (let ((method-,@<method-name-n>
+		 (lambda (<method-param-n-prime> ...)  <method-body-n>)) ...)
+            ; build the constructor
+	    (lambda (<ctor-param-n> ...)
+	      )))
+
+(define (apophasi:eval expression env)
+  )

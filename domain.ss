@@ -1,0 +1,26 @@
+
+#!r6rs
+(library (apophasi domain)
+  (import
+    (rnrs (6))
+    (rnrs base (6))
+    (rnrs enums (6))
+    (rnrs hashtables (6))
+    (rnrs lists (6))
+    (rnrs exceptions (6))
+    (rnrs conditions (6))
+    (rnrs records syntactic (6))
+    (srfi :14))
+  (export aphophasi:make-eval-domain)
+  
+  (define-syntax apophasi:make-eval-domain
+    "create a new type-marked domain"
+    (syntax-rules (:fields)
+      ((_ <name> <eval-body>
+       `(define (make-,@<name>)
+	  (lambda (exp env)
+	    (case (method)
+	      (`,@<method-name-n>
+	       ((lambda (params)
+		  <method-body-n>)
+		params) ...)))))))))
