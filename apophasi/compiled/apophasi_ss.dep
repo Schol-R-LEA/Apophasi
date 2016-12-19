@@ -1,1 +1,0 @@
-("6.3" ("385694117e02b51278a3f7b7b2cea272468e1171" . "c9bd30081705a8051627bd3b254f7ee326130508") (collects #"r6rs" #"lang" #"reader.rkt") (collects #"r6rs" #"main.rkt") (collects #"r6rs" #"private" #"prelims.rkt") (collects #"rnrs" #"base-6.rkt") (collects #"rnrs" #"eval-6.rkt") (collects #"rnrs" #"main-6.rkt"))
