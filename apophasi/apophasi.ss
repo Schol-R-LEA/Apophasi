@@ -10,111 +10,184 @@
   (rnrs base (6))
   (rnrs eval (6))
   (rnrs exceptions (6))
-  (rnrs conditions (6)))
-
+  (rnrs conditions (6))
+  (apophasi dispatch-table))
  
-
+ (define self-evaluating?
+   (lambda (arg-list)
+     (let ((expr (car arg-list)))
+       (or (number? expr)
+           (string? expr)
+           (char? expr)))))
  
- (define (self-evaluating? expr)
-   (or (number? expr)
-       (string? expr)
-       (char? expr)))
+ (define id
+   (lambda (arg-list)
+     (car arg-list)))
  
- (define (id expr env)
-   expr)
+ (define lexer-expansion?
+   (lambda (arg-list)
+     #f))
  
- (define (lexer-expansion? expr env)
-   #f)
+ (define expand-read-macro
+   (lambda (arg-list)
+     #f))
  
- (define (expand-read-macro expr env)
-   '())
-
-
-  (define (parser-expansion? expr env)
-   #f)
+ (define parser-expansion?
+   (lambda (arg-list)
+     #f))
  
- (define (expand-macro expr env)
-   '())
+ (define expand-macro
+   (lambda (arg-list)
+     #f))
  
- (define (variable? expr)
-   #f)
+ (define variable?
+   (lambda (arg-list)
+     #f))
  
- (define (get-value expr env)
-   '())
+ (define get-value
+   (lambda (arg-list)
+     #f))
  
- (define (quoted? expr)
-   #f)
+ (define quoted?
+   (lambda (arg-list)
+     #f))
  
- (define (get-quoted-expr expr env)
-   '())
+ (define get-quoted-expr
+   (lambda (arg-list)
+     #f))
  
- (define (assignment? expr)
-   #f)
+ (define quasiquoted?
+   (lambda (arg-list)
+     #f))
  
- (define (rebind expr env)
-   '())
+ (define get-qq-expr
+   (lambda (arg-list)
+     #f))
  
- (define (simple-conditional? expr)
-   #f)
+ (define spliced?
+   (lambda (arg-list)
+     #f))
  
- (define (select expr env) expr)
+ (define get-spliced-value
+   (lambda (arg-list)
+     #f))
  
+ (define assignment?
+   (lambda (arg-list)
+     #f))
  
- (define (complex-conditional? expr)
-   #f)
+ (define rebind
+   (lambda (arg-list)
+     #f))
  
- (define (multi-select expr env)
-   '())
+ (define simple-conditional?
+   (lambda (arg-list)
+     #f))
  
- (define (case-conditional? expr)
-   #f)
+ (define select
+   (lambda (arg-list)
+     #f))
  
- (define (case-select expr env)
-   '())
+ (define complex-conditional?
+   (lambda (arg-list)
+     #f))
  
- (define (match-conditional? expr)
-   #f)
+ (define multi-select
+   (lambda (arg-list)
+     #f))
  
- (define (domain-select expr env)
-   '())
+ (define case-conditional?
+   (lambda (arg-list)
+     #f))
  
- (define (lambda? expr)
-   #f)
+ (define case-select
+   (lambda (arg-list)
+     #f))
  
- (define (make-procedure expr env)
-   '())
+ (define match-conditional?
+   (lambda (arg-list)
+     #f))
  
- (define eval-dispatch-table
-   (list
+ (define domain-select  
+   (lambda (arg-list)
+     #f))
+ 
+ (define lambda?
+   (lambda (arg-list)
+     #f))
+ 
+ (define make-procedure
+   (lambda (arg-list)
+     #f))
+  
+ (define scoped-procedure?
+   (lambda (arg-list)
+     #f))
+ 
+ (define apply-procedure
+   (lambda (arg-list)
+     #f))
+ 
+ (define empty-handler
+   (lambda (args-list)
+     'NO-MATCH))
+ 
+ (define valid?
+   (lambda (result)
+     (not (equal? result 'NO-MATCH))))
+ 
+ (define macro-eval-dispatch-table
+   (make-dispatch-table
     ;; the first two, which handle macros,
     ;; *must* come before all other cases.
-    (list lexer-expansion? expand-read-macro)
-    (list parser-expansion? expand-macro)
-    (list self-evaluating? id)
-    (list quoted? get-quoted-expr)
-    (list apophasi:symbol? eval-value)))
-
+    ((lexer-expansion? expand-read-macro)
+     (parser-expansion? expand-macro))
+    ; return 'NO-MATCH if no result
+    empty-handler))
+ 
+ (define atom-eval-dispatch-table
+   (make-dispatch-table    
+    ((self-evaluating? id)
+     (quoted? get-quoted-expr)
+     (quasiquoted? get-qq-expr)
+     (spliced? get-spliced-value))
+    ; return 'NO-MATCH if no result
+    empty-handler))
+ 
  (define special-form-dispatch-table
-   (list
-    (list assignment? rebind)
-    (list simple-conditional? select)
-    (list complex-conditional? multi-select)
-    (list case-conditional? case-select)
-    (list match-conditional? domain-select)
-    (list lambda? make-procedure)))
+   (make-dispatch-table
+    ((assignment? rebind)
+     (simple-conditional? select)
+     (complex-conditional? multi-select)
+     (case-conditional? case-select)
+     (match-conditional? domain-select)
+     (lambda? make-procedure)
+     (scoped-procedure? apply-procedure))
+    ; return 'NO-MATCH if no result
+    empty-handler))
  
  (define (apophasi:eval expr env)
-   (let ((match (assp
-                 (lambda (assoc)
-                   (assoc expr))
-                 eval-dispatch-table)))
-     (if (list? match)
-         ((cadr match) expr env)
-         (raise-continuable
-          (condition
-           (make-apophasi-syntax-error expr)
-           (make-message-condition
-            "Could not evaluate expression"))))))
+   "Evaluator for the Apophasi sub-set of the Thelema language."
+   
+   ;; first, check to see if it is a macro or read macro,
+   ;; and if so, apply it
+   (let ((macro-eval-result (dispatch macro-eval-dispatch-table expr env)))
+     (if (valid? macro-eval-result)
+         macro-eval-result
+         (let ((atom-eval-result (dispatch atom-eval-dispatch-table expr env)))
+           (if (valid? atom-eval-result)
+               atom-eval-result
+               ; if the expression is not an atom or other
+               ; self-evaluating form such as a quote,
+               ; try to isdpatch it from the special forms
+               (let ((special-eval-result (dispatch special-form-dispatch-table expr env)))
+                 (if (valid? special-eval-result)
+                     special-eval-result
+                     (raise-continuable
+                      (condition
+                       (make-apophasi-syntax-error expr)
+                       (make-message-condition
+                        "EVAL - could not evaluate sub-expression"))))))))))
  
  (define-condition-type &apophasi-syntax-error &condition
    make-apophasi-syntax-error apophasi-syntax-error?

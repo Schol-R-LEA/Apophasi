@@ -21,6 +21,7 @@
    (guard (con
            ((apophasi-syntax-error? con)
             (begin
+              (display (apophasi-syntax-error-message con))
               (display (apophasi-syntax-error-irritant con))
               (display #\newline)
               #t)))
