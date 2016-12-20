@@ -113,3 +113,5 @@ Test end:
   result-kind: fail
 Group end: quoted expressions
 Group end: Test atomic expressions
+# of expected passes      9
+# of unexpected failures  4

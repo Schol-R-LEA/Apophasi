@@ -13,6 +13,8 @@
 (test-with-runner
  runner
  (test-group
+  "evaluator tests"
+ (test-group
   "Common failure modes"
   (test-assert
    "inline arithmetic"
@@ -48,4 +50,4 @@
    (test-equal "quoted nested list of symbols"
                '((foo) (bar baz) quux)
                (apophasi:eval '((foo) (bar baz) quux) '()))
-   )))
+   ))))

@@ -11,6 +11,9 @@
   (rnrs eval (6))
   (rnrs exceptions (6))
   (rnrs conditions (6)))
+
+ 
+
  
  (define (self-evaluating? expr)
    (or (number? expr)
@@ -19,6 +22,19 @@
  
  (define (id expr env)
    expr)
+ 
+ (define (lexer-expansion? expr env)
+   #f)
+ 
+ (define (expand-read-macro expr env)
+   '())
+
+
+  (define (parser-expansion? expr env)
+   #f)
+ 
+ (define (expand-macro expr env)
+   '())
  
  (define (variable? expr)
    #f)
@@ -70,9 +86,16 @@
  
  (define eval-dispatch-table
    (list
+    ;; the first two, which handle macros,
+    ;; *must* come before all other cases.
+    (list lexer-expansion? expand-read-macro)
+    (list parser-expansion? expand-macro)
     (list self-evaluating? id)
-    (list variable? get-value)
     (list quoted? get-quoted-expr)
+    (list apophasi:symbol? eval-value)))
+
+ (define special-form-dispatch-table
+   (list
     (list assignment? rebind)
     (list simple-conditional? select)
     (list complex-conditional? multi-select)
