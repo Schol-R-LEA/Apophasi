@@ -55,4 +55,4 @@
       1+3i (table 'dispatch (list 2+1i 1+1i)))
      (test-equal
       "indirectly dispatching from defined table type with a pair of complex arguments"
-      1+3i (dispatch table 2+1i 1+1i))))))
+1+3i (dispatch table 2+1i 1+1i))))))

@@ -50,28 +50,15 @@
         (list <pred-n> <dispatch-n>)
         ...)
        <table-miss-handler>))
-     ((_ (<pred-n> <dispatch-n>) ...)
+     ((_ ((<pred-n> <dispatch-n>) ...))
       (make-dispatch-table ((<pred-n> <dispatch-n>) ...)
-                           (lambda (arg-list)
+                           (lambda ()
                              (raise-continuable
                               (condition
                                (make-dispatch-table-lookup-failed arg-list)
                                (make-message-condition
-                                "Could not find a matching dispatch entry"))))))))
- 
- (define dispatch
-   (lambda (table . args)
-     (table 'dispatch args)))
- 
- (define add-dispatch-entry
-   (lambda (table pred evaluator)
-     (table 'add (list pred evaluator))))
- 
- 
- 
- (define (foo bar) (+ 1 (car bar)))
- (define (baz bar) (- 1 (car bar)))
- (define (quux bar) (* (car bar) (cadr bar)))
- 
- (define t (list (list integer? foo) (list real? baz) (list complex? quux))))
-
+                                "Could not find a matching dispatch entry"))))))
+     ((_ (<pred> <dispatch>) <table-miss-handler>)
+      (make-dispatch-table ((<pred> <dispatch>)) <table-miss-handler>))
+     ((_ (<pred> <dispatch>))
+      (make-dispatch-table ((<pred> <dispatch>)))))))
