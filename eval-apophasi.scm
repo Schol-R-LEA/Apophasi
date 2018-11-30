@@ -10,9 +10,14 @@
 
 (define repl
   (lambda ()
-    (display ">>> ")
-    (display (apophasi:eval (read) '()))
-    (display #\newline)
-    (repl)))
+    (display "Apophasi test REPL")
+    (let loop ((env '()))
+      (display)
+      (display #\newline)
+      (display #\newline)
+      (display ">>> ")
+      (let ((result (apophasi:eval (read) env)))
+        (display (car result))
+        (loop (cdr result))))))
 
 (repl)
